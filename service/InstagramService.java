@@ -71,14 +71,13 @@ public class InstagramService {
 
         if (seguidor != null && seguido != null) {
             seguidor.seguirUsuario(seguido);
-            System.out.println( + seguidor.getNome() + " agora segue " + seguido.getNome());
+            System.out.println(seguidor.getNome() + " agora segue " + seguido.getNome());
         } else {
             System.out.println("Usuário não encontrado!");
         }
     }
 
     private void criarPostagem() {
-        System.out.println("\n--- Criar Postagem ---");
         System.out.println("\n--- Criar Postagem ---");
 
         listarUsuarios();
@@ -97,7 +96,7 @@ public class InstagramService {
         Postagem postagem = null;
         if (tipo.equalsIgnoreCase("f")) {
             System.out.print("Digite a URL da imagem: ");
-            String conteudo = sc.nextLine();
+            String url = sc.nextLine();
             postagem = new PostagemFoto(autor, url);
         } else if (tipo.equalsIgnoreCase("v")) {
             System.out.print("Digite a URL do vídeo: ");
@@ -149,23 +148,86 @@ public class InstagramService {
 
     private void comentarPostagem() {
         System.out.println("\n--- Comentar Postagem ---");
-        // escolher usuário que comenta
-        // escolher postagem
-        // criar Comentario e adicionar
+        listarUsuarios();
+        System.out.print("Digite o nome de quem vai comentar: ");
+        String nomeQuemComenta = sc.nextLine();
+        Usuario quemComenta = buscarUsuarioPorNome(nomeQuemComenta);
+
+        System.out.print("Digite o nome do autor da postagem: ");
+        String nomeAutor = sc.nextLine();
+        Usuario autor = buscarUsuarioPorNome(nomeAutor);
+
+        if (quemComenta != null && autor != null) {
+            if (autor.getListaPostagens().isEmpty()) {
+                System.out.println("Esse usuário não tem postagens!");
+                return;
+            }
+
+            System.out.println("Postagens de " + autor.getNome() + ":");
+            for (int i = 0; i < autor.getListaPostagens().size(); i++) {
+                System.out.println(i + " - ");
+                autor.getListaPostagens().get(i).exibir();
+            }
+
+            System.out.print("Escolha o índice da postagem: ");
+            int idx = sc.nextInt();
+            sc.nextLine();
+
+            if (idx >= 0 && idx < autor.getListaPostagens().size()) {
+                Postagem postagem = autor.getListaPostagens().get(idx);
+                System.out.print("Digite o comentário: ");
+                String texto = sc.nextLine();
+
+                // Delegando ao usuário que comenta, similar ao fluxo de curtir
+                quemComenta.comentarPostagem(postagem, texto);
+                System.out.println("Comentário adicionado!");
+            }
+        } else {
+            System.out.println("Usuário não encontrado!");
+        }
     }
 
     private void listarPostagensUsuario() {
         System.out.println("\n--- Listar Postagens ---");
-        // escolher usuário
-        // percorrer lista de postagens e exibir
+        listarUsuarios();
+        System.out.print("Digite o nome do usuário: ");
+        String nome = sc.nextLine();
+        Usuario usuario = buscarUsuarioPorNome(nome);
+
+        if (usuario == null) {
+            System.out.println("Usuário não encontrado!");
+            return;
+        }
+
+        if (usuario.getListaPostagens().isEmpty()) {
+            System.out.println("Esse usuário não tem postagens!");
+            return;
+        }
+
+        System.out.println("Postagens de " + usuario.getNome() + ":");
+        for (Postagem p : usuario.getListaPostagens()) {
+            p.exibir();
+        }
     }
 
     private Usuario buscarUsuarioPorNome(String nome) {
-        // procurar usuário na lista pelo nome
+        for (Usuario u : usuarios) {
+            if (u.getNome().equalsIgnoreCase(nome)) {
+                return u;
+            }
+        }
         return null;
     }
 
     private void listarUsuarios() {
-        // imprimir todos os usuários cadastrados
+        if (usuarios.isEmpty()) {
+            System.out.println("Nenhum usuário cadastrado.");
+            return;
+        }
+
+        System.out.println("Usuários cadastrados:");
+        for (Usuario u : usuarios) {
+            System.out.println("- " + u.getNome());
+        }
     }
 }
